@@ -5,12 +5,13 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "data_table"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = %Q{Smart export of arbitrary ruby object collections}
+    gem.description = %Q{Smart export of arbitrary ruby object collections}
     gem.email = "ma@zive.at"
     gem.homepage = "http://github.com/michael/data_table"
     gem.authors = ["Michael Aufreiter"]
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
+    gem.add_dependency('fastercsv')
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
