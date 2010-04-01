@@ -62,8 +62,8 @@ class DataTable
     end
   end
   
-  def render_csv
-    FasterCSV.generate do |csv|
+  def render_csv(options)
+    FasterCSV.generate(options) do |csv|
       # Add headers
       headers = []
       @column_keys.each do |key|

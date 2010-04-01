@@ -34,7 +34,7 @@ class TestDataTable < Test::Unit::TestCase
       t.build_rows!(@order_positions) do |row, p| # block can be omitted
         row[:doubled_price] = p.price*2
       end
-      puts t.render_csv
+      puts t.render_csv(:col_sep => ";")
     end
   end
 end
