@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Michael Aufreiter"]
-  s.date = %q{2010-03-31}
+  s.date = %q{2010-04-12}
   s.description = %q{Smart export of arbitrary ruby object collections}
   s.email = %q{ma@zive.at}
   s.extra_rdoc_files = [
@@ -19,10 +19,12 @@ Gem::Specification.new do |s|
   s.files = [
     ".document",
      ".gitignore",
+     "Gemfile",
      "LICENSE",
      "README.rdoc",
      "Rakefile",
      "VERSION",
+     "data_table.gemspec",
      "lib/data_table.rb",
      "test/helper.rb",
      "test/test_data_table.rb"
@@ -42,15 +44,15 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<thoughtbot-shoulda>, [">= 0"])
-      s.add_runtime_dependency(%q<fastercsv>, [">= 0"])
+      s.add_runtime_dependency(%q<fastercsv>, ["~> 1.5.3"])
+      s.add_development_dependency(%q<shoulda>, ["~> 2.10.3"])
     else
-      s.add_dependency(%q<thoughtbot-shoulda>, [">= 0"])
-      s.add_dependency(%q<fastercsv>, [">= 0"])
+      s.add_dependency(%q<fastercsv>, ["~> 1.5.3"])
+      s.add_dependency(%q<shoulda>, ["~> 2.10.3"])
     end
   else
-    s.add_dependency(%q<thoughtbot-shoulda>, [">= 0"])
-    s.add_dependency(%q<fastercsv>, [">= 0"])
+    s.add_dependency(%q<fastercsv>, ["~> 1.5.3"])
+    s.add_dependency(%q<shoulda>, ["~> 2.10.3"])
   end
 end
 
