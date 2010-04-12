@@ -22,6 +22,10 @@ class DataTable
       rows.each { |r| result = r[key] if r[key] > result }
       result
     end
+    
+    COUNT = lambda do |key, rows|
+      rows.length
+    end
 
   end
   
