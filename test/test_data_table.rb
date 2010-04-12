@@ -33,7 +33,7 @@ class TestDataTable < Test::Unit::TestCase
 
     end
     
-    should "work properly" do
+    should "work properly with the public method API" do
       
       t = DataTable.new
       
@@ -67,6 +67,43 @@ class TestDataTable < Test::Unit::TestCase
       puts grouped_table.to_csv
 
     end
-    
+
+    should "work properly with the constructor block API" do
+
+      t = DataTable.new(@order_positions) do
+
+        # Variant 1: implicit method lookup
+
+        column :articlenum,    "Articlenum"
+        column :name,          "Product Name"
+        column :ordered,       "Datum"
+        column :group,         "Product Group"
+
+        # Variant 2: explicit transformer function that yields an item of your collection
+
+        column :amount,        "Amount", lambda { |p| p.quantity * p.price }
+
+        # Variant 3: explicit row modification (see build_rows)
+
+        column(:doubled_price, "Doubled Price")
+        build_rows(source) do |row, p| # block can be omitted
+          row[:doubled_price] = p.price * 2
+        end
+
+      end
+
+      # Grouping
+
+      grouped_table = t.group_by(:ordered, {
+        :amount => DataTable::Aggregators::SUM,
+        :doubled_price => DataTable::Aggregators::SUM
+      }, lambda { |x| "#{x.year}-#{x.month}" })
+
+      # Exporting
+
+      puts grouped_table.to_csv
+
+    end
+
   end
 end

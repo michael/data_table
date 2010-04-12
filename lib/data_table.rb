@@ -59,19 +59,24 @@ class DataTable
   end
 
 
-  attr_accessor :rows, :columns
+  attr_accessor :rows, :columns, :source
   
-  def initialize
+  def initialize(source = [], &block)
+    @source         = source
     @rows, @columns = [], {}
     @column_keys    = [] # used to memorize the order of columns
+    instance_eval(&block) if block_given?
   end
   
-  def add_column(key, header, transformer = nil)
+  def column(key, header, transformer = nil)
     raise ColumnAlreadyExists if @columns.key?(key)
     @column_keys << key
     @columns[key] = Column.new(key, header, transformer)
   end
-  
+
+  alias :add_column :column
+
+
   def build_rows(items)
     items.each do |item|
       row = Row.new(self)
@@ -86,7 +91,7 @@ class DataTable
       rows << row
     end
   end
-  
+
   # aggregates a set of rows using aggregator functions
   def aggregate(key, rows, aggregators, group_key)
     aggregated_row = Row.new(self)
@@ -99,7 +104,7 @@ class DataTable
 
     aggregated_row
   end
-  
+
   # yields a grouped DataTable object
   def group_by(key, aggregators, group_key = lambda {|x| x })
     result = self.class.new
@@ -112,9 +117,9 @@ class DataTable
     end
     
     # copy implicitly selected colums from original data table
-    result.add_column(key, columns[key].header)
+    result.column(key, columns[key].header)
     aggregators.each_key do |key|
-      result.add_column(key, columns[key].header)
+      result.column(key, columns[key].header)
     end
     
     groups.each_value do |group|
