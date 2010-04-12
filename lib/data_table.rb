@@ -7,7 +7,7 @@ class DataTable
   
   INFINITY = 1.0 / 0
   
-  class Aggregators
+  module Aggregators
 
     SUM = lambda do |key, rows|
       rows.inject(0.0) { |sum, row| sum += row[key] }
