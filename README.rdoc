@@ -1,6 +1,107 @@
 = data_table
 
-Description goes here.
+In memory representation and manipulation of tabular data. Useful for powering all kinds of charts and exports.
+
+
+  class OrderPosition
+
+    attr_accessor :articlenum
+    attr_accessor :name
+    attr_accessor :ordered
+    attr_accessor :group
+    attr_accessor :quantity
+    attr_accessor :price
+
+    def initialize(articlenum, name, group, ordered, quantity, price)
+      @articlenum = articlenum
+      @name = name
+      @group = group
+      @ordered = ordered
+      @quantity = quantity
+      @price = price
+    end
+
+  end
+
+  order_positions = [
+    OrderPosition.new "23423424", "R2D1", "AA", Date.new(2009, 10, 4), 1, 1000.0,
+    OrderPosition.new "56456345", "R2D2", "AA", Date.new(2009,  9, 4), 1,  100.0,
+    OrderPosition.new "42342344", "R2D3", "AA", Date.new(2009,  9, 4), 1,   10.0,
+    OrderPosition.new "56757657", "R2D4", "BB", Date.new(2009, 10, 4), 1,  200.0,
+    OrderPosition.new "56678799", "R2D5", "BB", Date.new(2009, 10, 4), 1,   20.0
+  ]
+
+
+  # ----------------------------------------
+  #           DataTable block API
+  # ----------------------------------------
+
+  # order_positions will be available as source inside the block
+
+  t = DataTable.new(order_positions) do
+
+    # Variant 1: implicit method lookup
+
+    column :articlenum,    "Articlenum"
+    column :name,          "Product Name"
+    column :ordered,       "Datum"
+    column :group,         "Product Group"
+
+    # Variant 2: explicit transformer function that yields an item of your collection
+
+    column :amount,        "Amount", lambda { |p| p.quantity*p.price }
+
+    # Variant 3: explicit row modification (see build_rows)
+
+    column(:doubled_price, "Doubled Price")
+    build_rows(source) do |row, p| # block can be omitted
+      row[:doubled_price] = p.price * 2
+    end
+
+  end
+
+
+  # ----------------------------------------
+  #      DataTable public method API
+  # ----------------------------------------
+
+  t = DataTable.new
+
+  # Variant 1: implicit method lookup
+
+  t.column :articlenum,    "Articlenum"
+  t.column :name,          "Product Name"
+  t.column :ordered,       "Datum"
+  t.column :group,         "Product Group"
+
+  # Variant 2: explicit transformer function that yields an item of your collection
+
+  t.column(:amount,        "Amount", lambda { |p| p.quantity*p.price })
+
+  # Variant 3: explicit row modification (see build_rows)
+
+  t.column(:doubled_price, "Doubled Price")
+  t.build_rows(order_positions) do |row, p| # block can be omitted
+    row[:doubled_price] = p.price * 2
+  end
+
+
+  # ----------------------------------------
+  #                Grouping
+  # ----------------------------------------
+
+  grouped_table = t.group_by(:ordered, {
+    :amount        => DataTable::Aggregators::SUM,
+    :doubled_price => DataTable::Aggregators::SUM
+  }, lambda { |x| "#{x.year}-#{x.month}" })
+
+
+  # ----------------------------------------
+  #                Exporting
+  # ----------------------------------------
+
+  grouped_table.to_csv # defaults to (:col_sep => ",")
+
 
 == Note on Patches/Pull Requests
  
