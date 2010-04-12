@@ -123,8 +123,8 @@ class DataTable
     
     result
   end
-  
-  def render_csv(options)
+
+  def to_csv(options = { :col_sep => ','})
     FasterCSV.generate(options) do |csv|
       # Add headers
       headers = []

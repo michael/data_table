@@ -62,8 +62,9 @@ class TestDataTable < Test::Unit::TestCase
         :doubled_price => DataTable::Aggregators::SUM
       }, lambda { |x| "#{x.year}-#{x.month}" })
 
-      # puts t.render_csv(:col_sep => ",")
-      puts grouped_table.render_csv(:col_sep => ",")
+      # Exporting
+
+      puts grouped_table.to_csv
 
     end
     
