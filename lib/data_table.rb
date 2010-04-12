@@ -1,5 +1,3 @@
-require 'fastercsv'
-
 class DataTable
 
   class ColumnAlreadyExists < StandardError ; end
@@ -130,6 +128,7 @@ class DataTable
   end
 
   def to_csv(options = { :col_sep => ','})
+    require 'fastercsv'
     FasterCSV.generate(options) do |csv|
       # Add headers
       headers = []
