@@ -1,16 +1,16 @@
 require 'fastercsv'
 
 class DataTable
+
   class ColumnAlreadyExists < StandardError ; end
-  class ColumnNotFound < StandardError ; end
+  class ColumnNotFound      < StandardError ; end
   
-  INFINITY = 1.0/0
+  INFINITY = 1.0 / 0
   
   class Aggregators
-    SUM = lambda do |key, rows| 
-      result = 0.0
-      rows.each { |r| result += r[key] }
-      result
+
+    SUM = lambda do |key, rows|
+      rows.inject(0.0) { |sum, row| sum += row[key] }
     end
     
     MIN = lambda do |key, rows| 
@@ -24,26 +24,25 @@ class DataTable
       rows.each { |r| result = r[key] if r[key] > result }
       result
     end
+
   end
   
   class Column
-    attr_accessor :key
-    attr_accessor :header
-    attr_accessor :transformer
+
+    attr_accessor :key, :header, :transformer
 
     def initialize(key, header, transformer)
-      @key = key
-      @header = header
-      @transformer = transformer
+      @key, @header, @transformer = key, header, transformer
     end
+
   end
   
   class Row
+
     attr_accessor :cells
     
     def initialize(table)
-      @table = table
-      @cells = {}
+      @table, @cells = table, {}
     end
     
     # get cell
@@ -53,22 +52,22 @@ class DataTable
     
     # set cell
     def []=(key, value)
-      raise ColumnNotFound unless @table.columns.has_key?(key)
+      raise ColumnNotFound unless @table.columns.key?(key)
       @cells[key] = value
     end
+
   end
-  
-  attr_accessor :columns
-  attr_accessor :rows
+
+
+  attr_accessor :rows, :columns
   
   def initialize
-    @columns = {}
-    @column_keys = [] # used to memorize the order of columns
-    @rows = []
+    @rows, @columns = [], {}
+    @column_keys    = [] # used to memorize the order of columns
   end
   
   def add_column(key, header, transformer = nil)
-    raise ColumnAlreadyExists if @columns.has_key?(key)
+    raise ColumnAlreadyExists if @columns.key?(key)
     @column_keys << key
     @columns[key] = Column.new(key, header, transformer)
   end
@@ -76,7 +75,7 @@ class DataTable
   def build_rows(items)
     items.each do |item|
       row = Row.new(self)
-      @columns.each do |key, col|
+      columns.each do |key, col|
         if col.transformer
           row[key] = col.transformer.call(item)
         elsif item.respond_to?(key)
@@ -84,7 +83,7 @@ class DataTable
         end
       end
       yield(row, item) if block_given?
-      @rows << row
+      rows << row
     end
   end
   
@@ -103,19 +102,19 @@ class DataTable
   
   # yields a grouped DataTable object
   def group_by(key, aggregators, group_key = lambda {|x| x })
-    result = DataTable.new
+    result = self.class.new
     my_key = key
     groups = {}
     
-    @rows.each do |row|
+    rows.each do |row|
       idx = group_key.call(row[key])
       groups[idx] = groups[idx].to_a << row
     end
     
     # copy implicitly selected colums from original data table
-    result.add_column(key, @columns[key].header)
+    result.add_column(key, columns[key].header)
     aggregators.each_key do |key|
-      result.add_column(key, @columns[key].header)
+      result.add_column(key, columns[key].header)
     end
     
     groups.each_value do |group|
@@ -130,13 +129,13 @@ class DataTable
       # Add headers
       headers = []
       @column_keys.each do |key|
-        headers << @columns[key].header
+        headers << columns[key].header
       end
       
       csv << headers
       
       # Add data rows
-      @rows.each do |row|
+      rows.each do |row|
         row_data = []
         @column_keys.each do |key|
           row_data << row[key]
@@ -146,6 +145,5 @@ class DataTable
       
     end
   end
+
 end
-
-

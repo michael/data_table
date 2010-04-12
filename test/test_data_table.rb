@@ -1,6 +1,7 @@
 require 'helper'
 
 class TestDataTable < Test::Unit::TestCase
+
   context "A DataTable instance" do
     setup do
       
@@ -29,36 +30,42 @@ class TestDataTable < Test::Unit::TestCase
         OrderPosition.new("DTJA6181", "R2DX",        "BB", Date.new(2009, 10, 4), 1, 200.0 ),
         OrderPosition.new("DTJA6181", "R2DX",        "BB", Date.new(2009, 10, 4), 1, 20.0 )
       ]
+
     end
     
     should "work properly" do
       
       t = DataTable.new
       
-      # variant 1: implicit method lookup
-      t.add_column(:articlenum, "Articlenum")
-      t.add_column(:name, "Product Name")
-      t.add_column(:ordered, "Datum")
-      t.add_column(:group, "Product Group")
-      # variant 2: explicit transformer function that yields an item of your collection 
-      t.add_column(:amount, "Amount", lambda { |p| p.quantity*p.price })
-      # variant 3: explicit row modification (see build_rows!)
+      # Variant 1: implicit method lookup
+
+      t.add_column :articlenum,    "Articlenum"
+      t.add_column :name,          "Product Name"
+      t.add_column :ordered,       "Datum"
+      t.add_column :group,         "Product Group"
+
+      # Variant 2: explicit transformer function that yields an item of your collection
+
+      t.add_column(:amount,        "Amount", lambda { |p| p.quantity*p.price })
+
+      # Variant 3: explicit row modification (see build_rows)
+
       t.add_column(:doubled_price, "Doubled Price")
-      
       t.build_rows(@order_positions) do |row, p| # block can be omitted
-        row[:doubled_price] = p.price*2
+        row[:doubled_price] = p.price * 2
       end
-      
+
+      # Grouping
+
       grouped_table = t.group_by(:ordered, {
         :amount => DataTable::Aggregators::SUM,
         :doubled_price => DataTable::Aggregators::SUM
-      }, lambda {|x| x.year.to_s+"-"+x.month.to_s})
-      
+      }, lambda { |x| "#{x.year}-#{x.month}" })
+
       # puts t.render_csv(:col_sep => ",")
       puts grouped_table.render_csv(:col_sep => ",")
+
     end
-    
-    
     
   end
 end
