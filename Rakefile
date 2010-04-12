@@ -14,7 +14,6 @@ begin
     gem.homepage    = "http://github.com/michael/data_table"
     gem.authors     = ["Michael Aufreiter"]
 
-    gem.add_dependency             'fastercsv', '~> 1.5.3'
     gem.add_development_dependency 'shoulda',   '~> 2.10.3'
 
   end
