@@ -1,3 +1,5 @@
+require 'json'
+
 class DataTable
 
   class ColumnAlreadyExists < StandardError ; end
@@ -5,10 +7,42 @@ class DataTable
   
   INFINITY = 1.0 / 0
   
+  module Formatters
+    def self.number_to_currency(number, options = {})
+        precision = options[:precision] || 2
+        unit      = options[:unit] || ""
+        separator = precision > 0 ? options[:separator] || "." : ""
+        delimiter = options[:delimiter] || ""
+        format    = options[:format] || "%u%n"
+      begin
+        parts = number_with_precision(number, precision).split('.')
+        format.gsub(/%n/, number_with_delimiter(parts[0], delimiter) + separator + parts[1].to_s).gsub(/%u/, unit)
+      rescue
+        number
+      end
+    end
+    
+    def self.number_with_delimiter(number, delimiter=",", separator=".")
+      begin
+        parts = number.to_s.split('.')
+        parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{delimiter}")
+        parts.join separator
+      rescue
+        number
+      end
+    end
+    
+    def self.number_with_precision(number, precision=3)
+      "%01.#{precision}f" % ((Float(number) * (10 ** precision)).round.to_f / 10 ** precision)
+    rescue
+      number
+    end
+  end
+  
   module Aggregators
 
     SUM = lambda do |key, rows|
-      rows.inject(0.0) { |sum, row| sum += row[key] }
+      rows.inject(0) { |sum, row| sum += row[key] }
     end
     
     MIN = lambda do |key, rows| 
@@ -131,9 +165,14 @@ class DataTable
     result
   end
 
-  def to_csv(options = { :col_sep => ','})
+  def to_csv(options = { :col_sep => ',', :number_delimiter => '', :number_separator => '.' })
     require 'fastercsv'
-    FasterCSV.generate(options) do |csv|
+    
+    csv_options = options.clone
+    csv_options.delete(:number_delimiter)
+    csv_options.delete(:number_separator)
+    
+    FasterCSV.generate(csv_options) do |csv|
       # Add headers
       headers = []
       @column_keys.each do |key|
@@ -146,7 +185,14 @@ class DataTable
       rows.each do |row|
         row_data = []
         @column_keys.each do |key|
-          row_data << row[key]
+          val = row[key]
+          
+          if val.kind_of?(Numeric)
+            row_data << Formatters.number_to_currency(val, :separator => options[:number_separator], :delimiter => options[:number_delimiter])
+          else
+            row_data << val
+          end
+                    
         end
         csv << row_data
       end
