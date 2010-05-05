@@ -199,5 +199,42 @@ class DataTable
       
     end
   end
+  
+  # export to envision collection format
+  def to_collection
+    # content_type :json  
+    result = {:items => [], :properties => {} }
+    
+    # properties
+    @column_keys.each do |key|
+      column = columns[key]
+      result[:properties][column.key] = {:name => column.header, :value_key => 'name'}
+    end
+    
+    i = 0
+    # items
+    rows.each do |row|
+      
+      item = {
+        :name => "Name",
+        :attributes => []
+      }
+      
+      @column_keys.each do |key|
+        val = row[key]
+        attribute = {:values => []}
+        
+        attribute[:property] = key
+        attribute[:values] << {:id => i, :value => val}
+        i += 1
+        
+        item[:attributes] << attribute
+                  
+      end
+      result[:items] << item
+    end
+    
+    JSON.pretty_generate(result)
+  end
 
 end
