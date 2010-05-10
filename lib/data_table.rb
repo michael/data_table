@@ -236,5 +236,26 @@ class DataTable
     
     JSON.pretty_generate(result)
   end
+  
+  def to_json
+    # content_type :json
+    result = {:items => [], :properties => {} }
+    
+    # properties
+    @column_keys.each do |key|
+      column = columns[key]
+      result[:properties][column.key] = {:name => column.header}
+    end
+    
+    rows.each do |row|
+      item = {}
+      @column_keys.each do |key|
+        item[key] = row[key]
+      end
+      result[:items] << item
+    end
+    
+    JSON.pretty_generate(result)
+  end
 
 end
