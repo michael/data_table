@@ -91,7 +91,6 @@ class DataTable
       raise ColumnNotFound unless @table.columns.key?(key)
       @cells[key] = value
     end
-
   end
 
 
@@ -200,38 +199,39 @@ class DataTable
     end
   end
   
+  def self.is_numeric?(i)
+    i = i.to_s
+    i.to_i.to_s == i || i.to_f.to_s == i
+  end
+
+  
   # export to envision collection format
   def to_collection
     # content_type :json  
-    result = {:items => [], :properties => {} }
+    result = {:items => {}, :properties => {} }
     
     # properties
     @column_keys.each do |key|
       column = columns[key]
-      result[:properties][column.key] = {:name => column.header, :value_key => 'name'}
+      result[:properties][column.key] = {:name => column.header, :type => 'string'}
     end
     
     i = 0
+    
     # items
     rows.each do |row|
-      
-      item = {
-        :name => "Name",
-        :attributes => []
-      }
-      
+      item = {}
       @column_keys.each do |key|
-        val = row[key]
-        attribute = {:values => []}
+        item[key] = row[key]
         
-        attribute[:property] = key
-        attribute[:values] << {:id => i, :value => val}
-        i += 1
-        
-        item[:attributes] << attribute
-                  
+        if i == 0 # update property types based on the values
+          puts row[key].to_s
+          result[:properties][key][:type] = DataTable.is_numeric?(row[key]) ? 'number' : 'string'
+        end
       end
-      result[:items] << item
+      
+      i += 1
+      result[:items][i.to_s] = item
     end
     
     JSON.pretty_generate(result)
