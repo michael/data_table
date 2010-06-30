@@ -223,9 +223,7 @@ class DataTable
       item = {}
       @column_keys.each do |key|
         item[key] = row[key]
-        
         if i == 0 # update property types based on the values
-          puts row[key].to_s
           result[:properties][key][:type] = DataTable.is_numeric?(row[key]) ? 'number' : 'string'
         end
       end
