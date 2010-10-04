@@ -164,7 +164,7 @@ class DataTable
     result
   end
 
-  def to_csv(options = { :col_sep => ',', :number_delimiter => '', :number_separator => '.' })
+  def to_csv(options = { :col_sep => ',', :number_delimiter => '', :number_separator => '.', :precision => 2 })
     require 'fastercsv'
     
     csv_options = options.clone
@@ -187,7 +187,7 @@ class DataTable
           val = row[key]
           
           if val.kind_of?(Numeric)
-            row_data << Formatters.number_to_currency(val, :separator => options[:number_separator], :delimiter => options[:number_delimiter])
+            row_data << Formatters.number_to_currency(val, :precision => options[:precision], :separator => options[:number_separator], :delimiter => options[:number_delimiter])
           else
             row_data << val
           end
@@ -203,7 +203,6 @@ class DataTable
     i = i.to_s
     i.to_i.to_s == i || i.to_f.to_s == i
   end
-
   
   # export to envision collection format
   def to_collection
