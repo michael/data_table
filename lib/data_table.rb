@@ -170,6 +170,7 @@ class DataTable
     csv_options = options.clone
     csv_options.delete(:number_delimiter)
     csv_options.delete(:number_separator)
+    csv_options.delete(:precision)
     
     FasterCSV.generate(csv_options) do |csv|
       # Add headers
@@ -191,7 +192,6 @@ class DataTable
           else
             row_data << val
           end
-                    
         end
         csv << row_data
       end
