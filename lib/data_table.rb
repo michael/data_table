@@ -65,12 +65,11 @@ class DataTable
   
   class Column
 
-    attr_accessor :key, :header, :transformer
+    attr_accessor :key, :header, :transformer, :options
 
-    def initialize(key, header, transformer)
-      @key, @header, @transformer = key, header, transformer
+    def initialize(key, header, transformer, options)
+      @key, @header, @transformer, @options = key, header, transformer, options
     end
-
   end
   
   class Row
@@ -103,10 +102,10 @@ class DataTable
     instance_eval(&block) if block_given?
   end
   
-  def column(key, header, transformer = nil)
+  def column(key, header, transformer = nil, options = {})
     raise ColumnAlreadyExists if @columns.key?(key)
     @column_keys << key
-    @columns[key] = Column.new(key, header, transformer)
+    @columns[key] = Column.new(key, header, transformer, options)
   end
 
   alias :add_column :column
@@ -206,13 +205,13 @@ class DataTable
   
   # export to envision collection format
   def to_collection
-    # content_type :json  
+    # content_type :json
     result = {:items => {}, :properties => {} }
     
     # properties
     @column_keys.each do |key|
       column = columns[key]
-      result[:properties][column.key] = {:name => column.header, :type => 'string'}
+      result[:properties][column.key] = {:name => column.header, :type => 'string', :unique => true, :meta => column.options }
     end
     
     i = 0
